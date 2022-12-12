@@ -52,11 +52,12 @@ def get_unvisited(visited,shortestpaths,target=None):
     else: # order by distance to target
         return [x for _, x in sorted(zip(disttotarget, unvisited))]
 
-def find_ways(starti,startj,shortestpaths,visited):
+def find_ways(starti,startj,shortestpaths,visited,reverse=False):
     # ways=[]
+    rev = -1 if reverse else 1
     for i in [starti-1,starti+1]:
         if i >=0 and i < len(shortestpaths) and not visited[i][startj]:
-            dist = ord(map[i][startj])-ord(map[starti][startj])
+            dist = rev*(ord(map[i][startj])-ord(map[starti][startj]))
             if dist<=1:
                 # ways.append((i,startj))
                 path = shortestpaths[starti][startj]+1
@@ -65,7 +66,7 @@ def find_ways(starti,startj,shortestpaths,visited):
                     shortestpaths[i][startj]=path
     for j in [startj-1,startj+1]:
         if j>=0 and j < len(shortestpaths[0]) and not visited[starti][j]:
-            dist = ord(map[starti][j])-ord(map[starti][startj])
+            dist = rev*(ord(map[starti][j])-ord(map[starti][startj]))
             if dist<=1:
                 # ways.append((starti,j))            
                 path = shortestpaths[starti][startj]+1
@@ -92,20 +93,30 @@ def find_shortest_path(map,source,target,max=None):
     
     return shortestpaths[target[0]][target[1]],shortestpaths
 
+def find_shortest_path_to_a(map,source,target):
+    shortestpaths=[[1e300 for b in map[0]] for c in map]
+
+    visited=[[False for b in map[0]] for c in map]
+
+    shortestpaths[source[0]][source[1]]=0
+    unvisited=get_unvisited(visited,shortestpaths)
+    while not visited[target[0]][target[1]] and len(unvisited)>0:
+        if map[unvisited[0][0]][unvisited[0][1]]=='a':
+            return shortestpaths[unvisited[0][0]][unvisited[0][1]],shortestpaths
+        shortestpaths,visited=find_ways(*unvisited[0],shortestpaths,visited,True)
+        unvisited = get_unvisited(visited,shortestpaths)
+
+    return shortestpaths[target[0]][target[1]],shortestpaths
+
 part1,shortestpaths = find_shortest_path(map,source,target)
 
 print('------------------------')
 print('Part 1:',part1)
 print('------------------------')
 
-starts=[]
-best = int(1e300)
-for i,row in enumerate(map):
-    for j,_ in enumerate(row):
-        if map[i][j]=='a':
-            shortestsofar,_ = find_shortest_path(map,(i,j),target,best)
-            if shortestsofar<best:
-                best=shortestsofar
+best,shortestpaths=find_shortest_path_to_a(map,target,source)
+
+print_map(shortestpaths,map,target,source,'output.txt')
 
 print('Part 2:',best)
 print('------------------------')
