@@ -1,6 +1,6 @@
-import numpy as np
-import plotly.graph_objects as go
+import math
 
+global M
 
 class Monkey:
     def __init__(self,items,operation,operationvalue,test,truetarget,falsetarget):
@@ -16,41 +16,37 @@ class Monkey:
         return f'Items: {self.items}, Activity:{self.activity}'
 
     def inspect_and_throw(self,allmonkeys,dividebythree=True):
-        
         for item in self.items:
-            item == reduce(item)
             self.activity+=1
             # Perform operation
-            item = self.operation(item,self.operationvalue)
+            item = self.operation(item,self.operationvalue,not dividebythree)
             # Divide by 3 and round down
             if dividebythree:
                 item=item//3
-            # Test
-
-            # if item>1e20:
-            #     item=reduce(item)
             if item%self.test==0:
-                # item=item//self.test
                 allmonkeys[self.truetarget].items.append(item)
             else:
                 allmonkeys[self.falsetarget].items.append(item)
         self.items=[]
-        
 
-def add(old,value):
-    return old+value
+def getM(monkeys):
+    res = 1
+    for item in [monkey.test for monkey in monkeys]:
+        res*=item
+    return res
 
-def multiply(old,value):
+def add(old,value,optimize):
+    new = old+value
+    return new
+
+def multiply(old,value,optimize):
     return old*value
 
-def square(old,value):
-    return old**2
-
-def reduce(g):
-    for p in [2,3,5,7,11,13,17,19]:
-        while (g//(p**8))%p==0 and g%p==0:
-            g=g//p
-    return g
+def square(old,value,optimize):
+    if optimize:
+        return M+(old**2)%M
+    else:
+        return old**2
 
 def getmonkeys():
     testmonkeys = [
@@ -157,10 +153,10 @@ def getmonkeys():
     return monkeys,testmonkeys
 
 monkeys,testmonkeys=getmonkeys()
-for item in testmonkeys:
-    print(item)
+
 
 for i in range(20):
+    M = getM(monkeys)
     for monkey in monkeys:
         monkey.inspect_and_throw(monkeys)
 
@@ -174,42 +170,13 @@ print('------------------------')
 
 monkeys,testmonkeys=getmonkeys()
 
-activities=[]
-diffs=[]
-activity=[0,0,0,0]
-slope=[0,0,0,0]
-r = 20
-for i in range(400):
-    for monkey in testmonkeys:
-        monkey.inspect_and_throw(testmonkeys,dividebythree=False)
-        
-    if i%1==0:
-        oldactivity = activity
-        activity = [monkey.activity for monkey in testmonkeys]
-        diff = [activity[j]-oldactivity[j] for j,_ in enumerate(activity)]
-        activities.append(activity)
-        diffs.append(diff)
-        
-        if i>r:
-            slope = [(a-activities[r][j])/(i-r) for j,a in enumerate(activity)]
-            print(slope)
-            print([int(s*(1000-r))+activities[r][j] for j,s in enumerate(slope)])
+for i in range(10000):
+    for monkey in monkeys:
+        monkey.inspect_and_throw(monkeys,dividebythree=False)
 
-fig = go.Figure()
+activity = [monkey.activity for monkey in monkeys]
 
-for k,_ in enumerate(activities[0]):
-    fig.add_trace(go.Scatter(x0=0,dx=1,y=[a[k] for a in activities]))
+activity.sort()
 
-for k,slo in enumerate(slope):
-    fig.add_trace(go.Scatter(x0=0,dx=1,y=[int((g-r)*slo)+activities[r][k] for g in range(600)]))
-
-fig.show()
-
-# for monkey in testmonkeys:
-#     print(monkey)
-
-# activity = [monkey.activity for monkey in testmonkeys]
-
-# print(activity)
-
-# print('Part 2:',activity[-2]*activity[-1])
+print('Part 2:',activity[-2]*activity[-1])
+print('------------------------')
