@@ -1,3 +1,6 @@
+import numpy as np
+import plotly.graph_objects as go
+
 
 class Monkey:
     def __init__(self,items,operation,operationvalue,test,truetarget,falsetarget):
@@ -41,11 +44,7 @@ def multiply(old,value):
     return old*value
 
 def square(old,value):
-    if old>1e60:
-        v = reduce(old)**2
-    else:
-        v = old**2   
-    return v
+    return old**2
 
 def reduce(g):
     for p in [2,3,5,7,11,13,17,19]:
@@ -173,18 +172,38 @@ print('------------------------')
 print('Part 1:',activity[-2]*activity[-1])
 print('------------------------')
 
-
 monkeys,testmonkeys=getmonkeys()
-for i in range(600):
-    # if i%17==0:
-        # oldactivity = activity
-        # activity = [monkey.activity for monkey in testmonkeys]
-        # diff = [activity[i]-oldactivity[i] for i,_ in enumerate(activity)]
-        # print(i)
-        # print(activity)
-        # print(diff)
+
+activities=[]
+diffs=[]
+activity=[0,0,0,0]
+slope=[0,0,0,0]
+r = 20
+for i in range(400):
     for monkey in testmonkeys:
         monkey.inspect_and_throw(testmonkeys,dividebythree=False)
+        
+    if i%1==0:
+        oldactivity = activity
+        activity = [monkey.activity for monkey in testmonkeys]
+        diff = [activity[j]-oldactivity[j] for j,_ in enumerate(activity)]
+        activities.append(activity)
+        diffs.append(diff)
+        
+        if i>r:
+            slope = [(a-activities[r][j])/(i-r) for j,a in enumerate(activity)]
+            print(slope)
+            print([int(s*(1000-r))+activities[r][j] for j,s in enumerate(slope)])
+
+fig = go.Figure()
+
+for k,_ in enumerate(activities[0]):
+    fig.add_trace(go.Scatter(x0=0,dx=1,y=[a[k] for a in activities]))
+
+for k,slo in enumerate(slope):
+    fig.add_trace(go.Scatter(x0=0,dx=1,y=[int((g-r)*slo)+activities[r][k] for g in range(600)]))
+
+fig.show()
 
 # for monkey in testmonkeys:
 #     print(monkey)
