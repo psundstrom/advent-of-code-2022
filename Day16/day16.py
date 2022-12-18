@@ -1,5 +1,5 @@
 from collections import deque
-# import networkx as nx
+import networkx as nx
 
 
 with open('Day16/input.txt') as file:
@@ -8,35 +8,40 @@ with open('Day16/input.txt') as file:
 V={}
 opened_=[]
 
+G = nx.DiGraph()
+
 for line in lines:
     words = line.split()
     valve = words[1]
     flowrate = int(words[4].split('=')[-1][:-1])
     tunnels = ''.join(line.split(';')[-1].split()[4:]).split(',')
     V[valve]=[flowrate,tunnels]
+    for tunnel in tunnels:
+        G.add_edge(valve,tunnel)
     opened_.append(flowrate==0)
 
 for key in V.keys():
     print(key,V[key][0])
 
 def find_shortest_path(V,source,target):
-    Q = deque()
-    visited = set()
-    visited.add(source)
-    Q.append(source)
-    dist = dict.fromkeys(V.keys())
-    for item in dist.keys():
-        dist[item]=0
-    
-    while len(Q)>0:
-        v = Q.pop()
-        if v == target:
-            return dist[v]
-        for pot in V[v][1]:
-            if pot not in visited:
-                dist[pot]=dist[v]+1
-                visited.add(pot)
-                Q.append(pot)
+    return nx.shortest_path_length(G,source,target)
+    # Q = deque()
+    # visited = set()
+    # visited.add(source)
+    # Q.append(source)
+    # dist = dict.fromkeys(V.keys())
+    # for item in dist.keys():
+    #     dist[item]=0
+
+    # while len(Q)>0:
+    #     v = Q.pop()
+    #     if v == target:
+    #         return dist[v]
+    #     for pot in V[v][1]:
+    #         if pot not in visited:
+    #             dist[pot]=dist[v]+1
+    #             visited.add(pot)
+    #             Q.append(pot)
 
 
 
@@ -68,3 +73,4 @@ print(get_pressure('AA',0,30,uo))
 print(n)
 
 print([(find_shortest_path(V,'AA',v)) for v in V.keys()])
+print([nx.shortest_path_length(G,'AA',v) for v in V.keys()])
