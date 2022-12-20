@@ -23,25 +23,6 @@ for line in lines:
 
 def find_shortest_path(V,source,target):
     return nx.shortest_path_length(G,source,target)
-    # Q = deque()
-    # visited = set()
-    # visited.add(source)
-    # Q.append(source)
-    # dist = dict.fromkeys(V.keys())
-    # for item in dist.keys():
-    #     dist[item]=0
-
-    # while len(Q)>0:
-    #     v = Q.pop()
-    #     if v == target:
-    #         return dist[v]
-    #     for pot in V[v][1]:
-    #         if pot not in visited:
-    #             dist[pot]=dist[v]+1
-    #             visited.add(pot)
-    #             Q.append(pot)
-
-
 
 opened = [k for i,k in enumerate(V.keys()) if opened_[i]]
 unopened = [k for i,k in enumerate(V.keys()) if not opened_[i]]
@@ -57,10 +38,8 @@ def get_pressure(start,pressure,minutes,unopened,oldmax=0,opened=[]):
     global n
     n+=1
     if pressure+sum([V[valve][0]*(minutes-shortestpaths[start][valve]) for valve in unopened])<oldmax:
-        # print('prune')
         return 0
     if minutes<=min([shortestpaths[start][valve] for valve in unopened]):
-        # print('prune2')
         return pressure
     else:
         if start in unopened:
@@ -82,9 +61,10 @@ def get_pressure(start,pressure,minutes,unopened,oldmax=0,opened=[]):
 
 uo = unopened.copy()
 max1 = get_pressure('AA',0,30,uo)
-# max1=1896
-print(max1)
-# print(n)
+
+print('------------------------')
+print('Part 1:',max1)
+print('------------------------')
 
 max2=max1
 for i in range(1,len(unopened)):
@@ -98,4 +78,5 @@ for i in range(1,len(unopened)):
         if v1+v2>max2:
             max2=v1+v2
 
-print(max2)
+print('Part 1:',max2)
+print('------------------------')
